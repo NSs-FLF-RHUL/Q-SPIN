@@ -52,6 +52,8 @@ function gap_n(kFn::Union{Float64,AbstractArray}, type::String)
 
     Δn = @. Δ0 * (kFn - g0) ^ 2 / ((kFn - g0) ^ 2 + g1) * (kFn - g2) ^ 2 /
        ((kFn-g2) .^ 2 + g3)
+    Δn[kFn .< g0] .= 1e-9
+    Δn[kFn .> g2] .= 1e-9
     return Δn
 end
 
