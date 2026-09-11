@@ -8,6 +8,53 @@ using ..PhysicalConstants: hbar, neutron_mass, electron_volt
 """
 $(TYPEDSIGNATURES)
 
+Equation of motion control
+
+# Arguments
+- `EoSName`: A string representing the names of the EoS.
+- 'Parameters': A struct containing the parameters for the EoS. This is optional and can be set to `nothing` if not needed.
+
+# Returns
+- 'EoS': The pressure-denisty relation for the specified EoS.
+- 'EoS_inv': The density presure relation of the specific EoS.
+
+"""
+function EoS_Type(EoSName::String; Parameters::ParameterType = nothing)
+    EoS, EoS_inv = if EoSName == "GCA2018"
+        EoS_GCA2018()
+    elseif EoSName == "TwoCompPoly"
+        EoS_two_component_polytrope(Parameters)
+    elseif EoSName == "NV1973"
+        EoS_NegeleVautherin1973()
+    elseif EoSName == "Interp"
+        EoS_LInterp(Parameters.file_name, Parameters.EoS_indices);
+    else
+        error("EoS Type only supports specific types: GCA2018, TwoCompPoly, NV1973, and Interp")
+    end
+    return EoS, EoS_inv
+end
+
+"""
+$(TYPEDSIGNATURES)
+
+This function reads in JSON data for a given file path and calculates the mutual friction parameters for a neutron star crust based on the Graber et al. 2018 model.
+According to Graber et al. 2018, the mutual friction coefficients are calculated based on the superfluid density and other physical parameters.
+The function returns a tuple containing the input parameters and the calculated mutual friction parameters, including the qubic spline interpolations for the mutual friction coefficients as functions of the superfluid density (in kg * m^-3, while the coverted input is in kg fm^-3) in log-log space.
+
+Here things are converted in the SI units so as MutualFrictionCoefficients
+
+# Arguments
+- `file_path`: A string representing the path to the JSON file containing the input parameters for the mutual friction calculations. The JSON file should contain an array of objects, each representing a different region of the neutron star crust with specific parameters such as baryon number density (nb), proton number (Z), neutron number (N), proton fraction (x), superfluid density (ns), lattice spacing (a), nuclear radius (RN), and pinning energy parameters (Es, E1, DE, xi, Ep).
+
+# Returns
+- 'output': A tuple containing the input parameters (in their original units from the input JSON file) and the calculated mutual friction parameters in array forms. The qubic spline interpolations for the mutual friction coefficients, B_EW and B_J, as functions of the superfluid density (in kg * m^-3, while the coverted input is in kg fm^-3) are included.
+"""
+
+function mfrictionGraber2016() end
+
+"""
+$(TYPEDSIGNATURES)
+
 This function reads in JSON data for a given file path and calculates the mutual friction parameters for a neutron star crust based on the Graber et al. 2018 model.
 According to Graber et al. 2018, the mutual friction coefficients are calculated based on the superfluid density and other physical parameters.
 The function returns a tuple containing the input parameters and the calculated mutual friction parameters, including the qubic spline interpolations for the mutual friction coefficients as functions of the superfluid density (in kg * m^-3, while the coverted input is in kg fm^-3) in log-log space.
