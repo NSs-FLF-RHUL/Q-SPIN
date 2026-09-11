@@ -4,35 +4,8 @@ using JSON: JSON
 using DataInterpolations: ExtrapolationType, QuadraticSpline
 using DocStringExtensions: TYPEDSIGNATURES
 using ..PhysicalConstants: hbar, neutron_mass, electron_volt
+using ..Parameters: ParameterType
 
-"""
-$(TYPEDSIGNATURES)
-
-Equation of motion control
-
-# Arguments
-- `EoSName`: A string representing the names of the EoS.
-- 'Parameters': A struct containing the parameters for the EoS. This is optional and can be set to `nothing` if not needed.
-
-# Returns
-- 'EoS': The pressure-denisty relation for the specified EoS.
-- 'EoS_inv': The density presure relation of the specific EoS.
-
-"""
-function EoS_Type(EoSName::String; Parameters::ParameterType = nothing)
-    EoS, EoS_inv = if EoSName == "GCA2018"
-        EoS_GCA2018()
-    elseif EoSName == "TwoCompPoly"
-        EoS_two_component_polytrope(Parameters)
-    elseif EoSName == "NV1973"
-        EoS_NegeleVautherin1973()
-    elseif EoSName == "Interp"
-        EoS_LInterp(Parameters.file_name, Parameters.EoS_indices);
-    else
-        error("EoS Type only supports specific types: GCA2018, TwoCompPoly, NV1973, and Interp")
-    end
-    return EoS, EoS_inv
-end
 
 """
 $(TYPEDSIGNATURES)
@@ -57,13 +30,13 @@ function mfrictionGraber2016()
 end
 
 function gap_n(kFn::Union{Float64,AbstractArray}, type::String)
-    if type == 's'
+    if type == "s"
         Δ0 = 68.0
         g0 = 0.1
         g1 = 4.0
         g2 = 1.7
         g3 = 4.0
-    elseif type == 'p'
+    elseif type == "p"
         Δ0 = 0.068
         g0 = 1.28
         g1 = 0.1
@@ -77,9 +50,8 @@ function gap_n(kFn::Union{Float64,AbstractArray}, type::String)
         )
     end
 
-    Δn =
-        Δ0 * (kFn - g0) .^ 2 ./ ((kFn - g0) .^ 2 + g1) .* (kFn - g2) .^ 2 ./
-        ((kFn-g2) .^ 2 + g3)
+    Δn = @. Δ0 * (kFn - g0) ^ 2 / ((kFn - g0) ^ 2 + g1) * (kFn - g2) ^ 2 /
+       ((kFn-g2) .^ 2 + g3)
     return Δn
 end
 

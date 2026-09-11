@@ -7,4 +7,34 @@ include("GraberCummingAnderson2018.jl")
 include("NegeleVautherin1973.jl")
 include("TwoComponentPolytrope.jl")
 include("EoS_LInterp.jl")
+
+"""
+$(TYPEDSIGNATURES)
+
+Equation of motion control
+
+# Arguments
+- `EoSName`: A string representing the names of the EoS.
+- 'Parameters': A struct containing the parameters for the EoS. This is optional and can be set to `nothing` if not needed.
+
+# Returns
+- 'EoS': The pressure-denisty relation for the specified EoS.
+- 'EoS_inv': The density presure relation of the specific EoS.
+
+"""
+function EoS_Type(EoSName::String; Parameters::ParameterType = nothing)
+    EoS, EoS_inv = if EoSName == "GCA2018"
+        EoS_GCA2018()
+    elseif EoSName == "TwoCompPoly"
+        EoS_two_component_polytrope(Parameters)
+    elseif EoSName == "NV1973"
+        EoS_NegeleVautherin1973()
+    elseif EoSName == "Interp"
+        EoS_LInterp(Parameters.file_name, Parameters.EoS_indices);
+    else
+        error("EoS Type only supports specific types: GCA2018, TwoCompPoly, NV1973, and Interp")
+    end
+    return EoS, EoS_inv
+end
+
 end
